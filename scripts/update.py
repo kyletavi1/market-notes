@@ -113,21 +113,50 @@ def fetch_news(symbol, limit=6):
     return items
 
 
-def build_overview(items):
-    """Distill RSS snippets into a short plain-text overview paragraph."""
+def _snippet_sentences(items, limit=6):
     import html as htmllib
-    sents = []
-    for it in items[:5]:
+    out = []
+    for it in items[:limit]:
         txt = re.sub(r"<[^>]+>", "", it.get("desc") or "")
         txt = htmllib.unescape(txt).strip()
         if not txt:
             continue
         first = re.split(r"(?<=[.!?])\s", txt)[0].strip()
-        if 30 < len(first) < 300 and first not in sents:
-            sents.append(first)
-        if len(sents) >= 3:
+        if 30 < len(first) < 250 and first not in out:
+            out.append(first)
+    return out
+
+
+def build_overview(sym, q, items):
+    """Overview: [what happened / is happening / could happen] for [stock],
+    because of [this]."""
+    parts = []
+    price, prev = q.get("price"), q.get("prevClose")
+    closes = q.get("closes") or []
+    day = pct(price, prev) if price and prev else None
+    week = pct(price, closes[-6]) if price and len(closes) >= 6 else None
+    d = lambda v: ("up" if v >= 0 else "down") + f" {abs(v):.1f}%"
+    if day is not None and abs(day) >= 3:
+        parts.append(f"{sym} moved sharply today, {d(day)}.")
+    elif day is not None and abs(day) >= 0.75:
+        parts.append(f"{sym} is {d(day)} today.")
+    elif week is not None and abs(week) >= 1.5:
+        parts.append(f"{sym} has drifted {d(week)} over the past week.")
+    else:
+        parts.append(f"{sym} has been fairly quiet lately.")
+    sents = _snippet_sentences(items)
+    if sents:
+        parts.append(f"The main story behind it: {sents[0]}")
+    else:
+        parts.append("No clear news driver, which usually just means normal "
+                     "market drift.")
+    fwd = re.compile(r"\b(will|expects?|forecast|outlook|guidance|upcoming|"
+                     r"next (week|month|quarter)|earnings|could|plans? to)\b", re.I)
+    for s in sents[1:]:
+        if fwd.search(s):
+            parts.append(f"Looking ahead: {s}")
             break
-    return " ".join(sents)
+    return " ".join(parts)
 
 
 # ---------------- alerts ----------------
@@ -236,7 +265,7 @@ def main():
             "marketState": q["marketState"],
             "dates": q["dates"],
             "closes": q["closes"],
-            "overview": build_overview(items),
+            "overview": build_overview(sym, q, items),
             "news": [{"title": n["title"], "link": n["link"], "date": n["date"]}
                      for n in items],
         }
