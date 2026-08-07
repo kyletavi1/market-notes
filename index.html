@@ -7,6 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>My Stocks</title>
+<link rel="apple-touch-icon" href="icon.png?v=1">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%230e1116'/%3E%3Cpolyline points='15,70 38,48 55,58 85,28' stroke='%234ade80' stroke-width='9' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
 <style>
 :root{
@@ -62,7 +63,11 @@ h1{font-size:1.35rem;font-weight:700}
 .periods{display:flex;gap:6px;margin:10px 0 6px;flex-wrap:wrap}
 .pbtn{background:var(--card2);border:1px solid var(--line);color:var(--dim);border-radius:8px;padding:5px 10px;font-size:.75rem;font-weight:600;cursor:pointer}
 .pbtn.active{color:var(--text);border-color:var(--accent)}
-svg.chart{width:100%;height:180px;display:block}
+.chwrap{position:relative}
+svg.chart{width:100%;height:180px;display:block;touch-action:pan-y}
+.tip{position:absolute;background:#0b0e13;border:1px solid var(--accent);border-radius:8px;padding:4px 8px;font-size:.72rem;pointer-events:none;display:none;white-space:nowrap;z-index:6;transform:translate(-50%,-130%)}
+.tip b{color:var(--accent)}
+.chfoot{display:flex;justify-content:space-between;color:var(--faint);font-size:.7rem;margin-top:4px}
 .legend{display:flex;gap:14px;font-size:.72rem;color:var(--dim);margin-top:6px}
 .legend .dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:4px}
 .alloc-row{display:flex;align-items:center;gap:10px;margin:8px 0}
@@ -76,9 +81,6 @@ svg.chart{width:100%;height:180px;display:block}
 .news .item{padding:10px 0;border-bottom:1px solid var(--line)}
 .news .item:last-child{border-bottom:none}
 .news .dt{color:var(--faint);font-size:.7rem;margin-top:2px}
-details{margin:8px 0;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 14px}
-summary{cursor:pointer;font-weight:600;font-size:.9rem}
-details p{color:var(--dim);font-size:.85rem;margin-top:8px}
 .note{color:var(--faint);font-size:.75rem;margin-top:10px}
 .badge{display:inline-block;background:var(--card2);border:1px solid var(--line);border-radius:999px;padding:3px 10px;font-size:.72rem;color:var(--dim);margin-top:8px}
 .setup input{width:100%;background:var(--card2);border:1px solid var(--line);border-radius:8px;color:var(--text);padding:10px;margin-top:8px;font-size:.85rem}
@@ -104,8 +106,6 @@ details p{color:var(--dim);font-size:.85rem;margin-top:8px}
 </div>
 
 <script>
-/* ------- your holdings (private): read from the link's #fragment every time.
-   The fragment never leaves your device; it's also cached in localStorage. ------- */
 function loadHoldings(){
   const h = location.hash;
   if (h.startsWith('#h=')){
@@ -131,20 +131,9 @@ const DESC = {
   VUG:"A fund of a few hundred large U.S. “growth” companies — businesses expected to grow faster than average, like Apple, Microsoft and Nvidia.",
   QQQ:"A fund tracking the 100 largest companies on the Nasdaq exchange. Heavily tilted toward technology.",
   SDY:"A fund of companies with a long track record of paying dividends (regular cash payouts to shareholders). Typically steadier and less dramatic than tech.",
-  SWPPX:"A fund tracking the S&P 500 — the 500 biggest U.S. companies. Owning it is like owning a sliver of the whole U.S. stock market. Because it's a mutual fund, its price only updates once a day after the market closes — that's why Schwab shows “N/A” during the day. Nothing is wrong.",
+  SWPPX:"A fund tracking the S&P 500 — the 500 biggest U.S. companies. Owning it is like owning a sliver of the whole U.S. stock market. As a mutual fund its price updates once a day, after the market closes.",
 };
 const COLORS={ARTY:"#7dd3fc",AAPL:"#4ade80",VUG:"#fbbf24",QQQ:"#f472b6",SDY:"#a78bfa",SWPPX:"#fb923c",Cash:"#5c6a80"};
-
-const GLOSSARY = [
- ["What's the difference between a stock and a fund?","A stock is a piece of one company (like Apple). A fund is a pre-made basket of many stocks, so one bad company can't hurt you much. Five of your six holdings are funds."],
- ["What does “cost basis” / “what you paid” mean?","The total amount of money you originally put in (including reinvested dividends). Comparing it to today's value tells you your true profit."],
- ["What's an “unrealized” gain?","Profit on paper. It only becomes real money (“realized”) when you sell. Until then the number moves with the market every day."],
- ["What's a dividend?","A cash payout some companies give shareholders, usually every three months. Yours automatically buy more shares (“reinvesting”), which is why your share counts have decimals."],
- ["What's the S&P 500?","A list of the 500 biggest U.S. companies, used as the standard measuring stick for “the market.” When this dashboard says something “beat the market,” it means it did better than the S&P 500."],
- ["What does the “bumpiness” rating mean?","It measures how much a holding's price jumps around day to day. A Calm holding drifts; a Wild one lurches. Bumpier isn't worse — it just means bigger swings in both directions, so expect drama."],
- ["Why do prices move every day?","Prices reflect what buyers and sellers agree things are worth right now, which shifts with company news, economic data, and mood. Daily moves under about 1% are ordinary noise."],
- ["When should I worry?","Single bad days rarely matter for long-term investors. Your phone alerts fire only on unusual moves (roughly 5%+ in a day, or big multi-day slides). No alert means nothing unusual is happening."],
-];
 
 const PERIODS = [["1W",5],["1M",21],["3M",63],["YTD","ytd"],["1Y",252],["5Y",99999]];
 const CHG_PERIODS = [["Day","day"],["Week",5],["Month",21],["Year",252]];
@@ -152,6 +141,7 @@ const CHG_PERIODS = [["Day","day"],["Week",5],["Month",21],["Year",252]];
 let DATA=null, HOLD=null, active="overview", chartPeriod={}, cmpMarket={}, acctSpan=252;
 let viewMode = localStorage.getItem('viewMode') || 'value';
 let chgMode = localStorage.getItem('chgMode') || 'day';
+let CHARTS={}, chartSeq=0;
 
 const $=s=>document.querySelector(s);
 const fmt$=n=>n==null?"—":n.toLocaleString("en-US",{style:"currency",currency:"USD",maximumFractionDigits: Math.abs(n)>=1000?0:2});
@@ -177,13 +167,12 @@ function dayChangePct(t){
 }
 function holdingsFor(sym){ return HOLD? HOLD.h.find(x=>x[0]===sym):null; }
 
-/* portfolio value: now, and N trading days ago */
 function acctValueNow(){
   let v=HOLD.cash||0;
   for(const [sym,qty] of HOLD.h){const t=DATA.tickers[sym];if(t&&t.price!=null)v+=qty*t.price;}
   return v;
 }
-function acctValueAgo(span){ // span: trading days back, or "day" for prev close
+function acctValueAgo(span){
   let v=HOLD.cash||0;
   for(const [sym,qty] of HOLD.h){
     const t=DATA.tickers[sym]; if(!t)continue;
@@ -192,7 +181,7 @@ function acctValueAgo(span){ // span: trading days back, or "day" for prev close
   }
   return v;
 }
-function acctSeries(maxSpan){ // [{d,v}] oldest->newest
+function acctSeries(maxSpan){
   const lens=HOLD.h.map(([s])=>DATA.tickers[s]?.closes?.length||0).filter(Boolean);
   if(!lens.length)return[];
   const n=Math.min(Math.min(...lens), maxSpan+1);
@@ -208,16 +197,74 @@ function acctSeries(maxSpan){ // [{d,v}] oldest->newest
   }
   return out;
 }
-function bumpiness(t){ // stdev of daily returns over ~1y, annualized-ish plain rating
+function bumpiness(t){
   const c=t.closes; if(!c||c.length<40)return null;
   const seg=c.slice(-253);
   const rets=[]; for(let i=1;i<seg.length;i++)rets.push((seg[i]-seg[i-1])/seg[i-1]);
   const m=rets.reduce((a,b)=>a+b,0)/rets.length;
-  const sd=Math.sqrt(rets.reduce((a,b)=>a+(b-m)*(b-m),0)/rets.length)*100; // daily % stdev
+  const sd=Math.sqrt(rets.reduce((a,b)=>a+(b-m)*(b-m),0)/rets.length)*100;
   if(sd<0.7)return["Calm","typically moves less than ±1% a day"];
   if(sd<1.2)return["Typical","usually moves about ±1% a day"];
   if(sd<2)return["Bumpy","often moves ±1–2% a day — expect swings"];
   return["Wild","regularly moves ±2%+ a day — big swings are normal"];
+}
+
+/* ---------- charts with scrubbing ---------- */
+const W=600,H=180,P=6;
+function ptsOf(s){
+  const v2=s.map(p=>p.v);const mn=Math.min(...v2),mx=Math.max(...v2),r=mx-mn||1;
+  return s.map((p,i)=>`${(i/(s.length-1)*(W-2*P)+P).toFixed(1)},${(H-P-(p.v-mn)/r*(H-2*P)).toFixed(1)}`).join(" ");
+}
+function lineSVG(series, opts={}){ // opts: {color, series2, mode:'usd'|'pct'}
+  if(series.length<2)return"";
+  const id="ch"+(chartSeq++);
+  CHARTS[id]={series, mode:opts.mode||"usd"};
+  const up=series[series.length-1].v>=series[0].v;
+  const col=opts.color||(up?"var(--up)":"var(--down)");
+  let svg=`<div class="chwrap" data-ch="${id}"><svg class="chart" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">`;
+  if(opts.series2&&opts.series2.length>1)svg+=`<polyline points="${ptsOf(opts.series2)}" fill="none" stroke="#5c6a80" stroke-width="2" stroke-dasharray="5,4"/>`;
+  svg+=`<polyline points="${ptsOf(series)}" fill="none" stroke="${col}" stroke-width="2.5" stroke-linejoin="round"/>
+  <circle class="scrubdot" r="4.5" fill="${col}" stroke="#0b0e13" stroke-width="1.5" style="display:none"/></svg>
+  <div class="tip"></div>`;
+  const a=series[0], b=series[series.length-1];
+  const chg=b.v-a.v, chgP=a.v?chg/a.v*100:0;
+  const fmt=opts.mode==="pct"?(x=>fmtPct(x-100)):fmtCents;
+  const mid=opts.mode==="pct"
+    ?`<span class="${cls(chgP)}">${fmtPct(chgP)} over this period</span>`
+    :`<span class="${cls(chg)}">${fmtChg(chg,chgP)}</span>`;
+  svg+=`<div class="chfoot"><span>${a.d}${opts.mode==="pct"?"":" · "+fmt$(a.v)}</span>${mid}<span>${b.d}${opts.mode==="pct"?"":" · "+fmt$(b.v)}</span></div></div>`;
+  return svg;
+}
+function attachScrub(){
+  document.querySelectorAll(".chwrap").forEach(w=>{
+    const id=w.dataset.ch, reg=CHARTS[id]; if(!reg)return;
+    const svg=w.querySelector("svg"), dot=w.querySelector(".scrubdot"), tip=w.querySelector(".tip");
+    const s=reg.series;
+    const vals=s.map(p=>p.v), mn=Math.min(...vals), mx=Math.max(...vals), r=mx-mn||1;
+    function show(clientX){
+      const rect=svg.getBoundingClientRect();
+      let frac=(clientX-rect.left)/rect.width;
+      frac=Math.max(0,Math.min(1,frac));
+      const idx=Math.round(frac*(s.length-1));
+      const p=s[idx];
+      const cx=idx/(s.length-1)*(W-2*P)+P;
+      const cy=H-P-(p.v-mn)/r*(H-2*P);
+      dot.setAttribute("cx",cx); dot.setAttribute("cy",cy); dot.style.display="";
+      const px=cx/W*rect.width, py=cy/H*rect.height;
+      tip.style.left=Math.max(50,Math.min(rect.width-50,px))+"px";
+      tip.style.top=py+"px";
+      const val=reg.mode==="pct"?fmtPct(p.v-100)+" since start":fmtCents(p.v);
+      tip.innerHTML=`<b>${val}</b><br>${p.d}`;
+      tip.style.display="block";
+    }
+    function hide(){ dot.style.display="none"; tip.style.display="none"; }
+    w.addEventListener("pointerdown",e=>show(e.clientX));
+    w.addEventListener("pointermove",e=>{if(e.pressure>0||e.pointerType==="mouse")show(e.clientX);});
+    w.addEventListener("pointerup",hide);
+    w.addEventListener("pointerleave",hide);
+    w.addEventListener("touchmove",e=>{show(e.touches[0].clientX);},{passive:true});
+    w.addEventListener("touchend",hide);
+  });
 }
 
 /* ---------- rendering ---------- */
@@ -246,48 +293,29 @@ function renderTotals(){
     <div class="total-label" style="margin-top:6px">${label} Change</div>
     <div class="total-sub ${cls(d)}">${fmtChg(d,p)}</div>
     <div class="chgbar">${bar}</div>
-    <div class="total-note">Includes ${fmtCents(HOLD.cash||0)} cash · Up ${fmt$(now-(HOLD.cash||0)-HOLD.h.reduce((a,x)=>a+x[2],0))} all-time vs what you put in</div>
+    <div class="total-note">Includes ${fmtCents(HOLD.cash||0)} cash · Up ${fmt$(now-(HOLD.cash||0)-HOLD.h.reduce((a,x)=>a+x[2],0))} all-time vs your investment</div>
   </div>`;
   document.querySelectorAll('.chgbar button').forEach(b=>b.onclick=()=>{chgMode=b.dataset.c;localStorage.setItem('chgMode',chgMode);renderTotals();});
 }
 
 function renderTabs(){
   const syms=Object.keys(DATA.tickers).filter(s=>s!==DATA.benchmark);
-  $("#tabs").innerHTML=[`<button class="tab ${active==="overview"?"active":""}" data-t="overview">Overview</button>`]
+  $("#tabs").innerHTML=[`<button class="tab ${active==="overview"?"active":""}" data-t="overview">Overview</button>`,
+    `<button class="tab ${active==="news"?"active":""}" data-t="news">News</button>`]
     .concat(syms.map(s=>`<button class="tab ${active===s?"active":""}" data-t="${s}">${s}</button>`)).join("");
   document.querySelectorAll(".tab").forEach(b=>b.onclick=()=>{active=b.dataset.t;render();window.scrollTo(0,0);});
-}
-
-function lineSVG(series, colorVar, series2){ // series:[{d,v}]
-  if(series.length<2)return"";
-  const W=600,H=180,P=6;
-  const all=series2?series.concat(series2):series;
-  const vals=series.map(p=>p.v);
-  const min=Math.min(...vals),max=Math.max(...vals),range=max-min||1;
-  const pts=s=>{const v2=s.map(p=>p.v);const mn=Math.min(...v2),mx=Math.max(...v2),r=mx-mn||1;
-    return s.map((p,i)=>`${(i/(s.length-1)*(W-2*P)+P).toFixed(1)},${(H-P-(p.v-mn)/r*(H-2*P)).toFixed(1)}`).join(" ");};
-  const up=series[series.length-1].v>=series[0].v;
-  let svg=`<svg class="chart" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">`;
-  if(series2&&series2.length>1)svg+=`<polyline points="${pts(series2)}" fill="none" stroke="#5c6a80" stroke-width="2" stroke-dasharray="5,4"/>`;
-  svg+=`<polyline points="${pts(series)}" fill="none" stroke="${colorVar||(up?"var(--up)":"var(--down)")}" stroke-width="2.5" stroke-linejoin="round"/></svg>
-  <div style="display:flex;justify-content:space-between;color:var(--faint);font-size:.7rem">
-    <span>${series[0].d}</span><span>low ${fmt$(min)} · high ${fmt$(max)}</span><span>${series[series.length-1].d}</span>
-  </div>`;
-  return svg;
 }
 
 function renderOverview(){
   const syms=Object.keys(DATA.tickers).filter(s=>s!==DATA.benchmark);
   let html="";
 
-  // account chart
   if(HOLD){
     const series=acctSeries(acctSpan);
     const pb=PERIODS.filter(p=>p[0]!=="YTD").map(([l,s])=>`<button class="pbtn ${acctSpan===s?"active":""}" data-a="${s}">${l}</button>`).join("");
-    html+=`<div class="sect">Your account over time</div><div class="card"><div class="periods">${pb}</div>${lineSVG(series)}<div class="note">Chart uses today's share counts throughout, so it shows how the market moved your holdings — not exactly when you deposited money.</div></div>`;
+    html+=`<div class="sect">Your account over time</div><div class="card"><div class="periods">${pb}</div>${lineSVG(series)}</div>`;
   }
 
-  // holdings list
   html+=`<div class="sect">Your holdings</div>`;
   html+=syms.map(sym=>{
     const t=DATA.tickers[sym], h=holdingsFor(sym), d=dayChangePct(t);
@@ -302,30 +330,47 @@ function renderOverview(){
     </div>`;
   }).join("");
 
-  // allocation
   if(HOLD){
     const now=acctValueNow();
     const parts=HOLD.h.map(([sym,qty])=>{const t=DATA.tickers[sym];return {sym,v:t&&t.price!=null?qty*t.price:0};});
     parts.push({sym:"Cash",v:HOLD.cash||0});
     parts.sort((a,b)=>b.v-a.v);
-    html+=`<div class="sect">How your money is split</div><div class="card">`+
+    html+=`<div class="sect">Breakdown</div><div class="card">`+
       parts.map(p=>{const pc=now?p.v/now*100:0;return `<div class="alloc-row"><div class="sym">${p.sym}</div><div class="bar"><div class="fill" style="width:${pc.toFixed(1)}%;background:${COLORS[p.sym]||"var(--accent)"}"></div></div><div class="pct">${pc.toFixed(1)}% · ${fmt$(p.v)}</div></div>`;}).join("")+
-      `<div class="note">A big slice in one place means that holding drives your account. Apple is ${(parts.find(p=>p.sym==="AAPL")?.v/now*100||0).toFixed(0)}% of your account — when Apple sneezes, your total catches a cold.</div></div>`;
+      `</div>`;
   }
 
-  // movers
   const movers=syms.map(sym=>({sym,d:dayChangePct(DATA.tickers[sym])})).filter(m=>m.d!=null&&Math.abs(m.d)>0.0001).sort((a,b)=>b.d-a.d);
   if(movers.length){
     html+=`<div class="sect">Today's movers</div><div class="card">`+
       movers.map(m=>{const h=holdingsFor(m.sym);const t=DATA.tickers[m.sym];const imp=h&&t.prevClose!=null?h[1]*(t.price-t.prevClose):null;
-        return `<div class="mover"><span><b>${m.sym}</b></span><span class="${cls(m.d)}">${arrow(m.d)}${fmtPct(m.d)}${imp!=null?` · ${imp>=0?"+":"−"}${fmt$(Math.abs(imp))} for you`:""}</span></div>`;}).join("")+`</div>`;
+        return `<div class="mover"><span><b>${m.sym}</b></span><span class="${cls(m.d)}">${arrow(m.d)}${fmtPct(m.d)}${imp!=null?` · ${imp>=0?"+":"−"}${fmt$(Math.abs(imp))}`:""}</span></div>`;}).join("")+`</div>`;
   }
 
-  html+=`<div class="sect">New to this? Tap a question</div>`+
-    GLOSSARY.map(([q,a])=>`<details><summary>${q}</summary><p>${a}</p></details>`).join("");
   $("#content").innerHTML=html;
   document.querySelectorAll("[data-go]").forEach(el=>el.onclick=()=>{active=el.dataset.go;render();window.scrollTo(0,0);});
   document.querySelectorAll("[data-a]").forEach(b=>b.onclick=()=>{acctSpan=parseInt(b.dataset.a);renderOverview();});
+  attachScrub();
+}
+
+function renderNews(){
+  const syms=Object.keys(DATA.tickers).filter(s=>s!==DATA.benchmark);
+  let html="";
+  syms.forEach(sym=>{
+    const t=DATA.tickers[sym], d=dayChangePct(t);
+    const ov=t.overview&&t.overview.length>20?t.overview:"No major news coverage right now — quiet is normal, and usually good.";
+    const links=(t.news||[]).slice(0,3).map(n=>`<div class="item"><a href="${n.link}" target="_blank" rel="noopener">${n.title}</a></div>`).join("");
+    html+=`<div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:baseline">
+        <span style="font-weight:700">${sym} <span style="color:var(--faint);font-weight:400;font-size:.78rem">${t.name||""}</span></span>
+        <span class="${cls(d)}" style="font-size:.85rem">${arrow(d)}${fmtPct(d)}</span>
+      </div>
+      <div class="desc" style="margin-top:8px">${ov}</div>
+      ${links?`<div class="news" style="margin-top:8px;border-top:1px solid var(--line)">${links}</div>`:""}
+    </div>`;
+  });
+  html+=`<div class="note">Overviews are distilled automatically from recent financial press coverage and refresh with the market data.</div>`;
+  $("#content").innerHTML=html;
 }
 
 function tickerSeries(t,span){
@@ -372,11 +417,10 @@ function renderStock(sym){
   const pos=h?`<div class="sect">Your position</div><div class="pos-grid">
     <div class="cell"><div class="k">You own</div><div class="v">${h[1].toLocaleString()} shares</div></div>
     <div class="cell"><div class="k">Worth now</div><div class="v">${t.price!=null?fmt$(h[1]*t.price):"—"}</div></div>
-    <div class="cell"><div class="k">You put in</div><div class="v">${fmt$(h[2])}</div></div>
+    <div class="cell"><div class="k">Investment</div><div class="v">${fmt$(h[2])}</div></div>
     <div class="cell"><div class="k">Your profit</div><div class="v ${t.price!=null?cls(h[1]*t.price-h[2]):""}">${t.price!=null?fmt$(h[1]*t.price-h[2]):"—"}</div></div>
   </div>`:"";
 
-  // plain-English monthly summary
   const m1=periodChange(t,21), mB=bm?periodChange(bm,21):null;
   let plain="";
   if(m1!=null){
@@ -387,10 +431,12 @@ function renderStock(sym){
 
   const series=tickerSeries(t,span);
   const chart=cmp&&bm
-    ? lineSVG(normalized(series),"var(--accent)",normalized(tickerSeries(bm,span)))
+    ? lineSVG(normalized(series),{color:"var(--accent)",series2:normalized(tickerSeries(bm,span)),mode:"pct"})
     : lineSVG(series);
-  const legend=cmp?`<div class="legend"><span><span class="dot" style="background:var(--accent)"></span>${sym}</span><span><span class="dot" style="background:#5c6a80"></span>S&P 500 (market)</span><span style="color:var(--faint)">both start at the same point — whichever line ends higher grew more</span></div>`:"";
+  const legend=cmp?`<div class="legend"><span><span class="dot" style="background:var(--accent)"></span>${sym}</span><span><span class="dot" style="background:#5c6a80"></span>S&P 500 (market)</span></div>`:"";
 
+  const ovText=t.overview&&t.overview.length>20?t.overview:"";
+  const newsOverview=ovText?`<div class="sect">News overview</div><div class="plain">${ovText}</div>`:"";
   const news=(t.news&&t.news.length)?`<div class="sect">Recent news</div><div class="card news">`+
     t.news.map(n=>`<div class="item"><a href="${n.link}" target="_blank" rel="noopener">${n.title}</a><div class="dt">${n.date||""}</div></div>`).join("")+`</div>`:"";
 
@@ -413,15 +459,20 @@ function renderStock(sym){
         <button class="pbtn ${cmp?"active":""}" data-cmp="1" style="margin-left:auto">vs market</button></div>
       ${chart}${legend}
     </div>
+    ${newsOverview}
     ${news}
     <div class="note">Performance is price change only; your actual return is a little higher because dividends buy extra shares along the way.</div>`;
   document.querySelectorAll(".pbtn[data-p]").forEach(b=>b.onclick=()=>{chartPeriod[sym]=b.dataset.p==="ytd"?"ytd":parseInt(b.dataset.p);renderStock(sym);});
   const cb=document.querySelector(".pbtn[data-cmp]"); if(cb)cb.onclick=()=>{cmpMarket[sym]=!cmp;renderStock(sym);};
+  attachScrub();
 }
 
 function render(){
+  CHARTS={}; chartSeq=0;
   renderTabs();
-  if(active==="overview") renderOverview(); else renderStock(active);
+  if(active==="overview") renderOverview();
+  else if(active==="news") renderNews();
+  else renderStock(active);
 }
 function renderAll(){ renderVToggle(); renderTotals(); render(); }
 
@@ -431,8 +482,7 @@ async function boot(){
     const r=await fetch("data.json?t="+Date.now());
     DATA=await r.json();
   }catch(e){
-    if(window.PREVIEW_DATA) DATA=window.PREVIEW_DATA;
-    else{$("#content").innerHTML=`<div class="card">Couldn't load market data. Check your connection and try again.</div>`;return;}
+    $("#content").innerHTML=`<div class="card">Couldn't load market data. Check your connection and try again.</div>`;return;
   }
   $("#updated").textContent="Updated "+DATA.updated;
   renderAll();
