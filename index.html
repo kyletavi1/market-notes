@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0e1116">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>My Stocks</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%230e1116'/%3E%3Cpolyline points='15,70 38,48 55,58 85,28' stroke='%234ade80' stroke-width='9' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<style>
+:root{
+  --bg:#0e1116; --card:#171c24; --card2:#1e2530; --line:#2a3342;
+  --text:#e8ecf2; --dim:#93a1b5; --faint:#5c6a80;
+  --up:#4ade80; --down:#f87171; --accent:#7dd3fc;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;line-height:1.45;padding-bottom:40px}
+.wrap{max-width:640px;margin:0 auto;padding:0 14px}
+header{padding:18px 0 8px}
+h1{font-size:1.35rem;font-weight:700}
+.updated{color:var(--faint);font-size:.75rem;margin-top:2px}
+.banner{background:#3b2f14;border:1px solid #6b5619;color:#fcd34d;font-size:.8rem;border-radius:10px;padding:10px 12px;margin:10px 0}
+.totalcard{background:linear-gradient(160deg,var(--card),var(--card2));border:1px solid var(--line);border-radius:16px;padding:16px;margin:12px 0}
+.total-label{color:var(--dim);font-size:.8rem}
+.total-val{font-size:2rem;font-weight:800;letter-spacing:-.5px;margin:2px 0}
+.total-sub{font-size:.9rem;margin-top:4px}
+.up{color:var(--up)} .down{color:var(--down)} .flat{color:var(--dim)}
+.tabs{display:flex;gap:6px;overflow-x:auto;padding:10px 0;position:sticky;top:0;background:var(--bg);z-index:5;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab{flex:0 0 auto;background:var(--card);border:1px solid var(--line);color:var(--dim);border-radius:999px;padding:8px 14px;font-size:.85rem;font-weight:600;cursor:pointer}
+.tab.active{background:var(--accent);color:#08222e;border-color:var(--accent)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin:10px 0}
+.rowcard{display:flex;justify-content:space-between;align-items:center;gap:10px;cursor:pointer}
+.rowcard .l .sym{font-weight:700}
+.rowcard .l .nm{color:var(--dim);font-size:.75rem;max-width:200px}
+.rowcard .r{text-align:right}
+.rowcard .r .v{font-weight:700}
+.rowcard .r .d{font-size:.8rem}
+.desc{color:var(--dim);font-size:.9rem}
+.price-big{font-size:1.8rem;font-weight:800;margin-top:6px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0 4px}
+.chip{background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:8px 10px;text-align:center;flex:1 1 28%}
+.chip .p{font-size:.7rem;color:var(--faint);text-transform:uppercase;letter-spacing:.5px}
+.chip .v{font-weight:700;font-size:.95rem;margin-top:2px}
+.chip .m{font-size:.65rem;color:var(--faint);margin-top:2px}
+.sect{font-size:.75rem;text-transform:uppercase;letter-spacing:1px;color:var(--faint);margin:18px 0 6px}
+.pos-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.pos-grid .cell{background:var(--card2);border-radius:10px;padding:10px}
+.cell .k{color:var(--faint);font-size:.7rem}
+.cell .v{font-weight:700;margin-top:2px}
+.plain{background:var(--card2);border-left:3px solid var(--accent);border-radius:0 10px 10px 0;padding:10px 12px;font-size:.9rem;margin:12px 0;color:var(--text)}
+.periods{display:flex;gap:6px;margin:10px 0 6px}
+.pbtn{background:var(--card2);border:1px solid var(--line);color:var(--dim);border-radius:8px;padding:5px 10px;font-size:.75rem;font-weight:600;cursor:pointer}
+.pbtn.active{color:var(--text);border-color:var(--accent)}
+svg.chart{width:100%;height:180px;display:block}
+.news a{color:var(--text);text-decoration:none;font-size:.9rem;display:block}
+.news .item{padding:10px 0;border-bottom:1px solid var(--line)}
+.news .item:last-child{border-bottom:none}
+.news .dt{color:var(--faint);font-size:.7rem;margin-top:2px}
+details{margin:8px 0;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 14px}
+summary{cursor:pointer;font-weight:600;font-size:.9rem}
+details p{color:var(--dim);font-size:.85rem;margin-top:8px}
+.note{color:var(--faint);font-size:.75rem;margin-top:10px}
+.hidden{display:none}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>My Stocks</h1>
+    <div class="updated" id="updated"></div>
+  </header>
+  <div id="previewBanner" class="banner hidden">Preview mode — charts show sample data until the live updater is switched on. Your share counts, costs and today's prices are real.</div>
+  <div id="totals"></div>
+  <nav class="tabs" id="tabs"></nav>
+  <main id="content"></main>
+</div>
+
+<script>
+/* ------------ your holdings (private) ------------
+   Loaded from the link's #fragment the first time, then kept only on this
+   device (localStorage). Never stored in the public repo. */
+function loadHoldings(){
+  if (window.PREVIEW_HOLD) return window.PREVIEW_HOLD;
+  const h = location.hash;
+  if (h.startsWith('#h=')){
+    try{
+      const dec = JSON.parse(atob(decodeURIComponent(h.slice(3))));
+      localStorage.setItem('holdings', JSON.stringify(dec));
+      history.replaceState(null,'',location.pathname+location.search);
+    }catch(e){}
+  }
+  try{ return JSON.parse(localStorage.getItem('holdings')); }catch(e){ return null; }
+}
+
+const DESC = {
+  ARTY:"A fund holding dozens of companies working on artificial intelligence and robotics. Owning ARTY means owning a small slice of each of them.",
+  AAPL:"Apple — the iPhone company. This is the only individual company you own directly; everything else in your account is a fund (a basket of many companies), so Apple will swing harder in both directions.",
+  VUG:"A fund of a few hundred large U.S. “growth” companies — businesses expected to grow faster than average, like Apple, Microsoft and Nvidia.",
+  QQQ:"A fund tracking the 100 largest companies on the Nasdaq exchange. Heavily tilted toward technology.",
+  SDY:"A fund of companies with a long track record of paying dividends (regular cash payouts to shareholders). Typically steadier and less dramatic than tech.",
+  SWPPX:"A fund tracking the S&P 500 — the 500 biggest U.S. companies. Owning it is like owning a sliver of the whole U.S. stock market. Because it's a mutual fund, its price only updates once a day after the market closes — that's why Schwab shows “N/A” during the day. Nothing is wrong.",
+};
+
+const GLOSSARY = [
+ ["What's the difference between a stock and a fund?","A stock is a piece of one company (like Apple). A fund is a pre-made basket of many stocks, so one bad company can't hurt you much. Five of your six holdings are funds."],
+ ["What does “cost basis” / “what you paid” mean?","The total amount of money you originally put in (including reinvested dividends). Comparing it to today's value tells you your true profit."],
+ ["What's an “unrealized” gain?","Profit on paper. It only becomes real money (“realized”) when you sell. Until then the number moves with the market every day."],
+ ["What's a dividend?","A cash payout some companies give shareholders, usually every three months. Yours are set to automatically buy more shares (“reinvesting”), which is why your share counts have decimals."],
+ ["What's the S&P 500?","A list of the 500 biggest U.S. companies, used as the standard measuring stick for “the market.” When this dashboard says something “beat the market,” it means it did better than the S&P 500."],
+ ["Why do prices move every day?","Prices reflect what buyers and sellers agree things are worth right now, which shifts with company news, economic data, and mood. Daily moves under about 1% are ordinary noise."],
+ ["When should I worry?","Single bad days rarely matter for long-term investors. The alerts on your phone are tuned to fire only on genuinely unusual moves (roughly 5%+ in a day, or big multi-day slides). If you get no alert, nothing unusual is happening."],
+];
+
+const PERIODS = [["1W",5],["1M",21],["3M",63],["YTD","ytd"],["1Y",252],["5Y",99999]];
+
+let DATA=null, HOLD=null, active="overview", chartPeriod={};
+
+const $=s=>document.querySelector(s);
+const fmt$=n=>n==null?"—":n.toLocaleString("en-US",{style:"currency",currency:"USD",maximumFractionDigits: Math.abs(n)>=1000?0:2});
+const fmtPct=n=>n==null?"—":(n>=0?"+":"")+n.toFixed(2)+"%";
+const cls=n=>n==null?"flat":n>0.001?"up":n<-0.001?"down":"flat";
+const arrow=n=>n==null?"":n>0.001?"▲ ":n<-0.001?"▼ ":"";
+
+function periodChange(t, span){
+  const c=t.closes; if(!c||c.length<2) return null;
+  let startIdx;
+  if(span==="ytd"){
+    const yr=t.dates[t.dates.length-1].slice(0,4);
+    startIdx=t.dates.findIndex(d=>d.startsWith(yr));
+    if(startIdx<0) startIdx=0;
+  } else startIdx=Math.max(0,c.length-1-span);
+  const a=c[startIdx], b=t.price??c[c.length-1];
+  return (b-a)/a*100;
+}
+
+function dayChangePct(t){
+  if(t.price==null||t.prevClose==null) return null;
+  return (t.price-t.prevClose)/t.prevClose*100;
+}
+
+function plainSummary(sym,t){
+  const bm=DATA.tickers[DATA.benchmark];
+  const m1=periodChange(t,21), mB=bm?periodChange(bm,21):null;
+  if(m1==null) return "";
+  let s=`Over the past month, ${sym} is ${m1>=0?"up":"down"} ${Math.abs(m1).toFixed(1)}%. `;
+  if(mB!=null){
+    const diff=m1-mB;
+    if(Math.abs(diff)<0.5) s+=`That's about the same as the overall market.`;
+    else if(diff>0) s+=`The overall market moved ${fmtPct(mB)} in that time, so ${sym} did better than the market.`;
+    else s+=`The overall market moved ${fmtPct(mB)}, so ${sym} lagged behind the market a bit.`;
+  }
+  return s;
+}
+
+/* ---------- rendering ---------- */
+function renderTotals(){
+  if(!HOLD){ $("#totals").innerHTML=`<div class="card">Add your holdings link to see account totals. (Open the private link Claude gave you once on this device.)</div>`; return; }
+  let val=0, cost=0, day=0, known=true;
+  for(const [sym,qty,c] of HOLD.h){
+    const t=DATA.tickers[sym]; if(!t||t.price==null){known=false;continue;}
+    val+=qty*t.price; cost+=c;
+    if(t.prevClose!=null) day+=qty*(t.price-t.prevClose);
+  }
+  val+=HOLD.cash||0;
+  const gain=val-(HOLD.cash||0)-cost;
+  const dayPct=val?day/(val-day)*100:0;
+  $("#totals").innerHTML=`
+  <div class="totalcard">
+    <div class="total-label">Everything you own here is worth</div>
+    <div class="total-val">${fmt$(val)}</div>
+    <div class="total-sub ${cls(day)}">${arrow(day)}${fmt$(Math.abs(day))} today (${fmtPct(dayPct)})</div>
+    <div class="total-sub ${cls(gain)}" style="margin-top:2px">${gain>=0?"Up":"Down"} ${fmt$(Math.abs(gain))} overall vs the ${fmt$(cost)} you put in</div>
+  </div>`;
+}
+
+function renderTabs(){
+  const syms=Object.keys(DATA.tickers).filter(s=>s!==DATA.benchmark);
+  $("#tabs").innerHTML=[`<button class="tab ${active==="overview"?"active":""}" data-t="overview">Overview</button>`]
+    .concat(syms.map(s=>`<button class="tab ${active===s?"active":""}" data-t="${s}">${s}</button>`)).join("");
+  document.querySelectorAll(".tab").forEach(b=>b.onclick=()=>{active=b.dataset.t;render();window.scrollTo(0,0);});
+}
+
+function holdingsFor(sym){ return HOLD? HOLD.h.find(x=>x[0]===sym):null; }
+
+function renderOverview(){
+  const syms=Object.keys(DATA.tickers).filter(s=>s!==DATA.benchmark);
+  let rows=syms.map(sym=>{
+    const t=DATA.tickers[sym], h=holdingsFor(sym), d=dayChangePct(t);
+    const isFund=sym==="SWPPX";
+    const dayTxt=(isFund&&(d==null||Math.abs(d)<0.0001))?`<span class="flat">updates after close</span>`:`<span class="${cls(d)}">${arrow(d)}${fmtPct(d)} today</span>`;
+    const worth=h&&t.price!=null?fmt$(h[1]*t.price):fmt$(t.price)+"/share";
+    const gain=h&&t.price!=null?(h[1]*t.price-h[2]):null;
+    return `<div class="card rowcard" data-go="${sym}">
+      <div class="l"><div class="sym">${sym}</div><div class="nm">${t.name||""}</div></div>
+      <div class="r"><div class="v">${worth}</div><div class="d">${dayTxt}</div>
+      ${gain!=null?`<div class="d ${cls(gain)}">${gain>=0?"+":"−"}${fmt$(Math.abs(gain)).replace("$","$")} all-time</div>`:""}</div>
+    </div>`;
+  }).join("");
+  rows+=`<div class="sect">New to this? Tap a question</div>`+
+    GLOSSARY.map(([q,a])=>`<details><summary>${q}</summary><p>${a}</p></details>`).join("");
+  $("#content").innerHTML=rows;
+  document.querySelectorAll("[data-go]").forEach(el=>el.onclick=()=>{active=el.dataset.go;render();window.scrollTo(0,0);});
+}
+
+function chartSVG(t,span){
+  const c=t.closes,d=t.dates; if(!c||c.length<2)return"";
+  let startIdx = span==="ytd" ? Math.max(0,d.findIndex(x=>x.startsWith(d[d.length-1].slice(0,4)))) : Math.max(0,c.length-1-span);
+  const seg=c.slice(startIdx);
+  const min=Math.min(...seg),max=Math.max(...seg),range=max-min||1;
+  const W=600,H=180,P=6;
+  const pts=seg.map((v,i)=>`${(i/(seg.length-1)*(W-2*P)+P).toFixed(1)},${(H-P-(v-min)/range*(H-2*P)).toFixed(1)}`).join(" ");
+  const upSeg=seg[seg.length-1]>=seg[0];
+  const col=upSeg?"var(--up)":"var(--down)";
+  return `<svg class="chart" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">
+    <polyline points="${pts}" fill="none" stroke="${col}" stroke-width="2.5" stroke-linejoin="round"/>
+  </svg>
+  <div style="display:flex;justify-content:space-between;color:var(--faint);font-size:.7rem">
+    <span>${d[startIdx]}</span><span>low ${fmt$(min)} · high ${fmt$(max)}</span><span>${d[d.length-1]}</span>
+  </div>`;
+}
+
+function renderStock(sym){
+  const t=DATA.tickers[sym], h=holdingsFor(sym), d=dayChangePct(t);
+  const bm=DATA.tickers[DATA.benchmark];
+  const isFund=sym==="SWPPX";
+  const span=chartPeriod[sym]??252;
+  const chips=PERIODS.map(([label,s])=>{
+    const v=periodChange(t,s), b=bm?periodChange(bm,s):null;
+    let m="";
+    if(v!=null&&b!=null){const diff=v-b; m=Math.abs(diff)<0.5?"≈ market":(diff>0?"beat market":"under market");}
+    return `<div class="chip"><div class="p">${label}</div><div class="v ${cls(v)}">${fmtPct(v)}</div><div class="m">${m}</div></div>`;
+  }).join("");
+  const pos=h?`<div class="sect">Your position</div><div class="pos-grid">
+    <div class="cell"><div class="k">You own</div><div class="v">${h[1].toLocaleString()} shares</div></div>
+    <div class="cell"><div class="k">Worth now</div><div class="v">${t.price!=null?fmt$(h[1]*t.price):"—"}</div></div>
+    <div class="cell"><div class="k">You put in</div><div class="v">${fmt$(h[2])}</div></div>
+    <div class="cell"><div class="k">Your profit</div><div class="v ${t.price!=null?cls(h[1]*t.price-h[2]):""}">${t.price!=null?fmt$(h[1]*t.price-h[2]):"—"}</div></div>
+  </div>`:"";
+  const news=(t.news&&t.news.length)?`<div class="sect">Recent news</div><div class="card news">`+
+    t.news.map(n=>`<div class="item"><a href="${n.link}" target="_blank" rel="noopener">${n.title}</a><div class="dt">${n.date||""}</div></div>`).join("")+`</div>`:"";
+  const dayLine=(isFund&&(d==null||Math.abs(d)<0.0001))
+    ?`<div class="flat" style="font-size:.9rem">Price updates once daily, after market close</div>`
+    :`<div class="${cls(d)}" style="font-size:1rem">${arrow(d)}${fmtPct(d)} today</div>`;
+  $("#content").innerHTML=`
+    <div class="card">
+      <div style="font-weight:700">${t.name||sym}</div>
+      <div class="desc" style="margin-top:6px">${DESC[sym]||""}</div>
+      <div class="price-big">${t.price!=null?fmt$(t.price):"—"} <span style="font-size:.8rem;color:var(--faint);font-weight:400">per share</span></div>
+      ${dayLine}
+    </div>
+    ${pos}
+    <div class="sect">Performance</div>
+    <div class="chips">${chips}</div>
+    <div class="plain">${plainSummary(sym,t)}</div>
+    <div class="card">
+      <div class="periods">${PERIODS.map(([l,s])=>`<button class="pbtn ${String(span)===String(s)?"active":""}" data-p="${s}">${l}</button>`).join("")}</div>
+      ${chartSVG(t,span)}
+    </div>
+    ${news}
+    <div class="note">Performance is price change only; your actual return is a little higher because dividends buy extra shares along the way.</div>`;
+  document.querySelectorAll(".pbtn").forEach(b=>b.onclick=()=>{chartPeriod[sym]=b.dataset.p==="ytd"?"ytd":parseInt(b.dataset.p);renderStock(sym);});
+}
+
+function render(){
+  renderTabs();
+  if(active==="overview") renderOverview(); else renderStock(active);
+}
+
+async function boot(){
+  HOLD=loadHoldings();
+  try{
+    const r=await fetch("data.json?t="+Date.now());
+    DATA=await r.json();
+  }catch(e){
+    if(window.PREVIEW_DATA) DATA=window.PREVIEW_DATA;
+    else{$("#content").innerHTML=`<div class="card">Couldn't load market data. Check your connection and pull to refresh.</div>`;return;}
+  }
+  if(!DATA && window.PREVIEW_DATA) DATA=window.PREVIEW_DATA;
+  $("#updated").textContent="Updated "+DATA.updated;
+  if(DATA.preview) $("#previewBanner").classList.remove("hidden");
+  renderTotals(); render();
+}
+boot();
+</script>
+</body>
+</html>
