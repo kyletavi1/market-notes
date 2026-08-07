@@ -13,21 +13,28 @@
   --bg:#0e1116; --card:#171c24; --card2:#1e2530; --line:#2a3342;
   --text:#e8ecf2; --dim:#93a1b5; --faint:#5c6a80;
   --up:#4ade80; --down:#f87171; --accent:#7dd3fc;
+  --sat:env(safe-area-inset-top,0px);
 }
 *{box-sizing:border-box;margin:0;padding:0}
 html{-webkit-text-size-adjust:100%}
-body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;line-height:1.45;padding-bottom:40px}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;line-height:1.45;padding-top:var(--sat);padding-bottom:calc(40px + env(safe-area-inset-bottom,0px))}
 .wrap{max-width:640px;margin:0 auto;padding:0 14px}
-header{padding:18px 0 8px}
+header{padding:18px 0 8px;display:flex;justify-content:space-between;align-items:flex-start}
 h1{font-size:1.35rem;font-weight:700}
-.updated{color:var(--faint);font-size:.75rem;margin-top:2px}
-.banner{background:#3b2f14;border:1px solid #6b5619;color:#fcd34d;font-size:.8rem;border-radius:10px;padding:10px 12px;margin:10px 0}
+.updated{color:var(--faint);font-size:.72rem;margin-top:2px}
+.vtoggle{display:flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;margin-top:4px}
+.vtoggle button{background:var(--card);color:var(--dim);border:none;padding:6px 10px;font-size:.72rem;font-weight:600;cursor:pointer}
+.vtoggle button.on{background:var(--accent);color:#08222e}
 .totalcard{background:linear-gradient(160deg,var(--card),var(--card2));border:1px solid var(--line);border-radius:16px;padding:16px;margin:12px 0}
 .total-label{color:var(--dim);font-size:.8rem}
-.total-val{font-size:2rem;font-weight:800;letter-spacing:-.5px;margin:2px 0}
-.total-sub{font-size:.9rem;margin-top:4px}
+.total-val{font-size:2.1rem;font-weight:800;letter-spacing:-.5px;margin:2px 0}
+.total-sub{font-size:.95rem;margin-top:2px;font-weight:600}
+.chgbar{display:flex;gap:6px;margin-top:10px}
+.chgbar button{background:var(--card2);border:1px solid var(--line);color:var(--dim);border-radius:8px;padding:4px 10px;font-size:.72rem;font-weight:600;cursor:pointer}
+.chgbar button.on{color:var(--text);border-color:var(--accent)}
+.total-note{color:var(--faint);font-size:.72rem;margin-top:8px}
 .up{color:var(--up)} .down{color:var(--down)} .flat{color:var(--dim)}
-.tabs{display:flex;gap:6px;overflow-x:auto;padding:10px 0;position:sticky;top:0;background:var(--bg);z-index:5;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.tabs{display:flex;gap:6px;overflow-x:auto;padding:10px 0;position:sticky;top:var(--sat);background:var(--bg);z-index:5;-webkit-overflow-scrolling:touch;scrollbar-width:none}
 .tabs::-webkit-scrollbar{display:none}
 .tab{flex:0 0 auto;background:var(--card);border:1px solid var(--line);color:var(--dim);border-radius:999px;padding:8px 14px;font-size:.85rem;font-weight:600;cursor:pointer}
 .tab.active{background:var(--accent);color:#08222e;border-color:var(--accent)}
@@ -40,6 +47,7 @@ h1{font-size:1.35rem;font-weight:700}
 .rowcard .r .d{font-size:.8rem}
 .desc{color:var(--dim);font-size:.9rem}
 .price-big{font-size:1.8rem;font-weight:800;margin-top:6px}
+.price-small{color:var(--faint);font-size:.85rem;margin-top:2px}
 .chips{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0 4px}
 .chip{background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:8px 10px;text-align:center;flex:1 1 28%}
 .chip .p{font-size:.7rem;color:var(--faint);text-transform:uppercase;letter-spacing:.5px}
@@ -50,11 +58,20 @@ h1{font-size:1.35rem;font-weight:700}
 .pos-grid .cell{background:var(--card2);border-radius:10px;padding:10px}
 .cell .k{color:var(--faint);font-size:.7rem}
 .cell .v{font-weight:700;margin-top:2px}
-.plain{background:var(--card2);border-left:3px solid var(--accent);border-radius:0 10px 10px 0;padding:10px 12px;font-size:.9rem;margin:12px 0;color:var(--text)}
-.periods{display:flex;gap:6px;margin:10px 0 6px}
+.plain{background:var(--card2);border-left:3px solid var(--accent);border-radius:0 10px 10px 0;padding:10px 12px;font-size:.9rem;margin:12px 0}
+.periods{display:flex;gap:6px;margin:10px 0 6px;flex-wrap:wrap}
 .pbtn{background:var(--card2);border:1px solid var(--line);color:var(--dim);border-radius:8px;padding:5px 10px;font-size:.75rem;font-weight:600;cursor:pointer}
 .pbtn.active{color:var(--text);border-color:var(--accent)}
 svg.chart{width:100%;height:180px;display:block}
+.legend{display:flex;gap:14px;font-size:.72rem;color:var(--dim);margin-top:6px}
+.legend .dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:4px}
+.alloc-row{display:flex;align-items:center;gap:10px;margin:8px 0}
+.alloc-row .sym{width:56px;font-weight:700;font-size:.85rem}
+.alloc-row .bar{flex:1;height:14px;background:var(--card2);border-radius:7px;overflow:hidden}
+.alloc-row .fill{height:100%;border-radius:7px}
+.alloc-row .pct{width:88px;text-align:right;font-size:.75rem;color:var(--dim)}
+.mover{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--line);font-size:.9rem}
+.mover:last-child{border-bottom:none}
 .news a{color:var(--text);text-decoration:none;font-size:.9rem;display:block}
 .news .item{padding:10px 0;border-bottom:1px solid var(--line)}
 .news .item:last-child{border-bottom:none}
@@ -63,36 +80,49 @@ details{margin:8px 0;background:var(--card);border:1px solid var(--line);border-
 summary{cursor:pointer;font-weight:600;font-size:.9rem}
 details p{color:var(--dim);font-size:.85rem;margin-top:8px}
 .note{color:var(--faint);font-size:.75rem;margin-top:10px}
+.badge{display:inline-block;background:var(--card2);border:1px solid var(--line);border-radius:999px;padding:3px 10px;font-size:.72rem;color:var(--dim);margin-top:8px}
+.setup input{width:100%;background:var(--card2);border:1px solid var(--line);border-radius:8px;color:var(--text);padding:10px;margin-top:8px;font-size:.85rem}
+.setup button{background:var(--accent);color:#08222e;border:none;border-radius:8px;padding:10px 14px;font-weight:700;margin-top:8px;cursor:pointer}
 .hidden{display:none}
 </style>
 </head>
 <body>
 <div class="wrap">
   <header>
-    <h1>My Stocks</h1>
-    <div class="updated" id="updated"></div>
+    <div>
+      <h1>My Stocks</h1>
+      <div class="updated" id="updated"></div>
+    </div>
+    <div class="vtoggle" id="vtoggle">
+      <button data-v="value">$ value</button>
+      <button data-v="share">per share</button>
+    </div>
   </header>
-  <div id="previewBanner" class="banner hidden">Preview mode — charts show sample data until the live updater is switched on. Your share counts, costs and today's prices are real.</div>
   <div id="totals"></div>
   <nav class="tabs" id="tabs"></nav>
   <main id="content"></main>
 </div>
 
 <script>
-/* ------------ your holdings (private) ------------
-   Loaded from the link's #fragment the first time, then kept only on this
-   device (localStorage). Never stored in the public repo. */
+/* ------- your holdings (private): read from the link's #fragment every time.
+   The fragment never leaves your device; it's also cached in localStorage. ------- */
 function loadHoldings(){
-  if (window.PREVIEW_HOLD) return window.PREVIEW_HOLD;
   const h = location.hash;
   if (h.startsWith('#h=')){
     try{
       const dec = JSON.parse(atob(decodeURIComponent(h.slice(3))));
       localStorage.setItem('holdings', JSON.stringify(dec));
-      history.replaceState(null,'',location.pathname+location.search);
+      return dec;
     }catch(e){}
   }
   try{ return JSON.parse(localStorage.getItem('holdings')); }catch(e){ return null; }
+}
+function saveFromPaste(){
+  const v = document.getElementById('pasteLink').value;
+  const i = v.indexOf('#h=');
+  if (i < 0){ alert('That doesn’t look like the private link — it should contain #h='); return; }
+  location.hash = v.slice(i);
+  location.reload();
 }
 
 const DESC = {
@@ -103,77 +133,122 @@ const DESC = {
   SDY:"A fund of companies with a long track record of paying dividends (regular cash payouts to shareholders). Typically steadier and less dramatic than tech.",
   SWPPX:"A fund tracking the S&P 500 — the 500 biggest U.S. companies. Owning it is like owning a sliver of the whole U.S. stock market. Because it's a mutual fund, its price only updates once a day after the market closes — that's why Schwab shows “N/A” during the day. Nothing is wrong.",
 };
+const COLORS={ARTY:"#7dd3fc",AAPL:"#4ade80",VUG:"#fbbf24",QQQ:"#f472b6",SDY:"#a78bfa",SWPPX:"#fb923c",Cash:"#5c6a80"};
 
 const GLOSSARY = [
  ["What's the difference between a stock and a fund?","A stock is a piece of one company (like Apple). A fund is a pre-made basket of many stocks, so one bad company can't hurt you much. Five of your six holdings are funds."],
  ["What does “cost basis” / “what you paid” mean?","The total amount of money you originally put in (including reinvested dividends). Comparing it to today's value tells you your true profit."],
  ["What's an “unrealized” gain?","Profit on paper. It only becomes real money (“realized”) when you sell. Until then the number moves with the market every day."],
- ["What's a dividend?","A cash payout some companies give shareholders, usually every three months. Yours are set to automatically buy more shares (“reinvesting”), which is why your share counts have decimals."],
+ ["What's a dividend?","A cash payout some companies give shareholders, usually every three months. Yours automatically buy more shares (“reinvesting”), which is why your share counts have decimals."],
  ["What's the S&P 500?","A list of the 500 biggest U.S. companies, used as the standard measuring stick for “the market.” When this dashboard says something “beat the market,” it means it did better than the S&P 500."],
+ ["What does the “bumpiness” rating mean?","It measures how much a holding's price jumps around day to day. A Calm holding drifts; a Wild one lurches. Bumpier isn't worse — it just means bigger swings in both directions, so expect drama."],
  ["Why do prices move every day?","Prices reflect what buyers and sellers agree things are worth right now, which shifts with company news, economic data, and mood. Daily moves under about 1% are ordinary noise."],
- ["When should I worry?","Single bad days rarely matter for long-term investors. The alerts on your phone are tuned to fire only on genuinely unusual moves (roughly 5%+ in a day, or big multi-day slides). If you get no alert, nothing unusual is happening."],
+ ["When should I worry?","Single bad days rarely matter for long-term investors. Your phone alerts fire only on unusual moves (roughly 5%+ in a day, or big multi-day slides). No alert means nothing unusual is happening."],
 ];
 
 const PERIODS = [["1W",5],["1M",21],["3M",63],["YTD","ytd"],["1Y",252],["5Y",99999]];
+const CHG_PERIODS = [["Day","day"],["Week",5],["Month",21],["Year",252]];
 
-let DATA=null, HOLD=null, active="overview", chartPeriod={};
+let DATA=null, HOLD=null, active="overview", chartPeriod={}, cmpMarket={}, acctSpan=252;
+let viewMode = localStorage.getItem('viewMode') || 'value';
+let chgMode = localStorage.getItem('chgMode') || 'day';
 
 const $=s=>document.querySelector(s);
 const fmt$=n=>n==null?"—":n.toLocaleString("en-US",{style:"currency",currency:"USD",maximumFractionDigits: Math.abs(n)>=1000?0:2});
+const fmtCents=n=>n==null?"—":Math.abs(n).toLocaleString("en-US",{style:"currency",currency:"USD",minimumFractionDigits:2,maximumFractionDigits:2});
+const fmtChg=(d,p)=>{const s=d>=0?"+":"−";return `${s}${fmtCents(d)}  (${s}${Math.abs(p).toFixed(2)}%)`};
 const fmtPct=n=>n==null?"—":(n>=0?"+":"")+n.toFixed(2)+"%";
 const cls=n=>n==null?"flat":n>0.001?"up":n<-0.001?"down":"flat";
 const arrow=n=>n==null?"":n>0.001?"▲ ":n<-0.001?"▼ ":"";
 
-function periodChange(t, span){
+function startIdx(t,span){
+  const c=t.closes,d=t.dates;
+  if(span==="ytd"){const yr=d[d.length-1].slice(0,4);const i=d.findIndex(x=>x.startsWith(yr));return i<0?0:i;}
+  return Math.max(0,c.length-1-span);
+}
+function periodChange(t,span){
   const c=t.closes; if(!c||c.length<2) return null;
-  let startIdx;
-  if(span==="ytd"){
-    const yr=t.dates[t.dates.length-1].slice(0,4);
-    startIdx=t.dates.findIndex(d=>d.startsWith(yr));
-    if(startIdx<0) startIdx=0;
-  } else startIdx=Math.max(0,c.length-1-span);
-  const a=c[startIdx], b=t.price??c[c.length-1];
+  const a=c[startIdx(t,span)], b=t.price??c[c.length-1];
   return (b-a)/a*100;
 }
-
 function dayChangePct(t){
   if(t.price==null||t.prevClose==null) return null;
   return (t.price-t.prevClose)/t.prevClose*100;
 }
+function holdingsFor(sym){ return HOLD? HOLD.h.find(x=>x[0]===sym):null; }
 
-function plainSummary(sym,t){
-  const bm=DATA.tickers[DATA.benchmark];
-  const m1=periodChange(t,21), mB=bm?periodChange(bm,21):null;
-  if(m1==null) return "";
-  let s=`Over the past month, ${sym} is ${m1>=0?"up":"down"} ${Math.abs(m1).toFixed(1)}%. `;
-  if(mB!=null){
-    const diff=m1-mB;
-    if(Math.abs(diff)<0.5) s+=`That's about the same as the overall market.`;
-    else if(diff>0) s+=`The overall market moved ${fmtPct(mB)} in that time, so ${sym} did better than the market.`;
-    else s+=`The overall market moved ${fmtPct(mB)}, so ${sym} lagged behind the market a bit.`;
+/* portfolio value: now, and N trading days ago */
+function acctValueNow(){
+  let v=HOLD.cash||0;
+  for(const [sym,qty] of HOLD.h){const t=DATA.tickers[sym];if(t&&t.price!=null)v+=qty*t.price;}
+  return v;
+}
+function acctValueAgo(span){ // span: trading days back, or "day" for prev close
+  let v=HOLD.cash||0;
+  for(const [sym,qty] of HOLD.h){
+    const t=DATA.tickers[sym]; if(!t)continue;
+    if(span==="day"){ v+=qty*(t.prevClose??t.price??0); }
+    else{ const c=t.closes; if(!c||!c.length)continue; v+=qty*c[Math.max(0,c.length-1-span)]; }
   }
-  return s;
+  return v;
+}
+function acctSeries(maxSpan){ // [{d,v}] oldest->newest
+  const lens=HOLD.h.map(([s])=>DATA.tickers[s]?.closes?.length||0).filter(Boolean);
+  if(!lens.length)return[];
+  const n=Math.min(Math.min(...lens), maxSpan+1);
+  const ref=DATA.tickers[HOLD.h[0][0]];
+  const out=[];
+  for(let k=n-1;k>=0;k--){
+    let v=HOLD.cash||0;
+    for(const [sym,qty] of HOLD.h){
+      const c=DATA.tickers[sym]?.closes; if(!c)continue;
+      v+=qty*c[c.length-1-k];
+    }
+    out.push({d:ref.dates[ref.dates.length-1-k], v});
+  }
+  return out;
+}
+function bumpiness(t){ // stdev of daily returns over ~1y, annualized-ish plain rating
+  const c=t.closes; if(!c||c.length<40)return null;
+  const seg=c.slice(-253);
+  const rets=[]; for(let i=1;i<seg.length;i++)rets.push((seg[i]-seg[i-1])/seg[i-1]);
+  const m=rets.reduce((a,b)=>a+b,0)/rets.length;
+  const sd=Math.sqrt(rets.reduce((a,b)=>a+(b-m)*(b-m),0)/rets.length)*100; // daily % stdev
+  if(sd<0.7)return["Calm","typically moves less than ±1% a day"];
+  if(sd<1.2)return["Typical","usually moves about ±1% a day"];
+  if(sd<2)return["Bumpy","often moves ±1–2% a day — expect swings"];
+  return["Wild","regularly moves ±2%+ a day — big swings are normal"];
 }
 
 /* ---------- rendering ---------- */
+function renderVToggle(){
+  document.querySelectorAll('#vtoggle button').forEach(b=>{
+    b.classList.toggle('on', b.dataset.v===viewMode);
+    b.onclick=()=>{viewMode=b.dataset.v;localStorage.setItem('viewMode',viewMode);renderAll();};
+  });
+}
+
 function renderTotals(){
-  if(!HOLD){ $("#totals").innerHTML=`<div class="card">Add your holdings link to see account totals. (Open the private link Claude gave you once on this device.)</div>`; return; }
-  let val=0, cost=0, day=0, known=true;
-  for(const [sym,qty,c] of HOLD.h){
-    const t=DATA.tickers[sym]; if(!t||t.price==null){known=false;continue;}
-    val+=qty*t.price; cost+=c;
-    if(t.prevClose!=null) day+=qty*(t.price-t.prevClose);
+  if(!HOLD){
+    $("#totals").innerHTML=`<div class="card setup"><b>One-time setup</b><div class="desc" style="margin-top:6px">This device doesn't have your share counts yet. Open your private link (the one ending in <b>#h=...</b>), or paste it below.</div><input id="pasteLink" placeholder="Paste your private link here"><br><button onclick="saveFromPaste()">Load my holdings</button></div>`;
+    return;
   }
-  val+=HOLD.cash||0;
-  const gain=val-(HOLD.cash||0)-cost;
-  const dayPct=val?day/(val-day)*100:0;
+  const now=acctValueNow();
+  const span=chgMode==="day"?"day":parseInt(chgMode);
+  const ago=acctValueAgo(span);
+  const d=now-ago, p=ago?d/ago*100:0;
+  const label={day:"Day",5:"Week",21:"Month",252:"Year"}[chgMode]||"Day";
+  const bar=CHG_PERIODS.map(([l,v])=>`<button class="${String(chgMode)===String(v)?'on':''}" data-c="${v}">${l}</button>`).join("");
   $("#totals").innerHTML=`
   <div class="totalcard">
-    <div class="total-label">Everything you own here is worth</div>
-    <div class="total-val">${fmt$(val)}</div>
-    <div class="total-sub ${cls(day)}">${arrow(day)}${fmt$(Math.abs(day))} today (${fmtPct(dayPct)})</div>
-    <div class="total-sub ${cls(gain)}" style="margin-top:2px">${gain>=0?"Up":"Down"} ${fmt$(Math.abs(gain))} overall vs the ${fmt$(cost)} you put in</div>
+    <div class="total-label">Account Value</div>
+    <div class="total-val">${fmt$(now)}</div>
+    <div class="total-label" style="margin-top:6px">${label} Change</div>
+    <div class="total-sub ${cls(d)}">${fmtChg(d,p)}</div>
+    <div class="chgbar">${bar}</div>
+    <div class="total-note">Includes ${fmtCents(HOLD.cash||0)} cash · Up ${fmt$(now-(HOLD.cash||0)-HOLD.h.reduce((a,x)=>a+x[2],0))} all-time vs what you put in</div>
   </div>`;
+  document.querySelectorAll('.chgbar button').forEach(b=>b.onclick=()=>{chgMode=b.dataset.c;localStorage.setItem('chgMode',chgMode);renderTotals();});
 }
 
 function renderTabs(){
@@ -183,91 +258,172 @@ function renderTabs(){
   document.querySelectorAll(".tab").forEach(b=>b.onclick=()=>{active=b.dataset.t;render();window.scrollTo(0,0);});
 }
 
-function holdingsFor(sym){ return HOLD? HOLD.h.find(x=>x[0]===sym):null; }
+function lineSVG(series, colorVar, series2){ // series:[{d,v}]
+  if(series.length<2)return"";
+  const W=600,H=180,P=6;
+  const all=series2?series.concat(series2):series;
+  const vals=series.map(p=>p.v);
+  const min=Math.min(...vals),max=Math.max(...vals),range=max-min||1;
+  const pts=s=>{const v2=s.map(p=>p.v);const mn=Math.min(...v2),mx=Math.max(...v2),r=mx-mn||1;
+    return s.map((p,i)=>`${(i/(s.length-1)*(W-2*P)+P).toFixed(1)},${(H-P-(p.v-mn)/r*(H-2*P)).toFixed(1)}`).join(" ");};
+  const up=series[series.length-1].v>=series[0].v;
+  let svg=`<svg class="chart" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">`;
+  if(series2&&series2.length>1)svg+=`<polyline points="${pts(series2)}" fill="none" stroke="#5c6a80" stroke-width="2" stroke-dasharray="5,4"/>`;
+  svg+=`<polyline points="${pts(series)}" fill="none" stroke="${colorVar||(up?"var(--up)":"var(--down)")}" stroke-width="2.5" stroke-linejoin="round"/></svg>
+  <div style="display:flex;justify-content:space-between;color:var(--faint);font-size:.7rem">
+    <span>${series[0].d}</span><span>low ${fmt$(min)} · high ${fmt$(max)}</span><span>${series[series.length-1].d}</span>
+  </div>`;
+  return svg;
+}
 
 function renderOverview(){
   const syms=Object.keys(DATA.tickers).filter(s=>s!==DATA.benchmark);
-  let rows=syms.map(sym=>{
+  let html="";
+
+  // account chart
+  if(HOLD){
+    const series=acctSeries(acctSpan);
+    const pb=PERIODS.filter(p=>p[0]!=="YTD").map(([l,s])=>`<button class="pbtn ${acctSpan===s?"active":""}" data-a="${s}">${l}</button>`).join("");
+    html+=`<div class="sect">Your account over time</div><div class="card"><div class="periods">${pb}</div>${lineSVG(series)}<div class="note">Chart uses today's share counts throughout, so it shows how the market moved your holdings — not exactly when you deposited money.</div></div>`;
+  }
+
+  // holdings list
+  html+=`<div class="sect">Your holdings</div>`;
+  html+=syms.map(sym=>{
     const t=DATA.tickers[sym], h=holdingsFor(sym), d=dayChangePct(t);
     const isFund=sym==="SWPPX";
     const dayTxt=(isFund&&(d==null||Math.abs(d)<0.0001))?`<span class="flat">updates after close</span>`:`<span class="${cls(d)}">${arrow(d)}${fmtPct(d)} today</span>`;
-    const worth=h&&t.price!=null?fmt$(h[1]*t.price):fmt$(t.price)+"/share";
-    const gain=h&&t.price!=null?(h[1]*t.price-h[2]):null;
+    let main, sub;
+    if(viewMode==="value"&&h&&t.price!=null){ main=fmt$(h[1]*t.price); const g=h[1]*t.price-h[2]; sub=`<div class="d ${cls(g)}">${g>=0?"+":"−"}${fmt$(Math.abs(g))} all-time</div>`; }
+    else { main=fmt$(t.price)+"/share"; sub=""; }
     return `<div class="card rowcard" data-go="${sym}">
       <div class="l"><div class="sym">${sym}</div><div class="nm">${t.name||""}</div></div>
-      <div class="r"><div class="v">${worth}</div><div class="d">${dayTxt}</div>
-      ${gain!=null?`<div class="d ${cls(gain)}">${gain>=0?"+":"−"}${fmt$(Math.abs(gain)).replace("$","$")} all-time</div>`:""}</div>
+      <div class="r"><div class="v">${main}</div><div class="d">${dayTxt}</div>${sub}</div>
     </div>`;
   }).join("");
-  rows+=`<div class="sect">New to this? Tap a question</div>`+
+
+  // allocation
+  if(HOLD){
+    const now=acctValueNow();
+    const parts=HOLD.h.map(([sym,qty])=>{const t=DATA.tickers[sym];return {sym,v:t&&t.price!=null?qty*t.price:0};});
+    parts.push({sym:"Cash",v:HOLD.cash||0});
+    parts.sort((a,b)=>b.v-a.v);
+    html+=`<div class="sect">How your money is split</div><div class="card">`+
+      parts.map(p=>{const pc=now?p.v/now*100:0;return `<div class="alloc-row"><div class="sym">${p.sym}</div><div class="bar"><div class="fill" style="width:${pc.toFixed(1)}%;background:${COLORS[p.sym]||"var(--accent)"}"></div></div><div class="pct">${pc.toFixed(1)}% · ${fmt$(p.v)}</div></div>`;}).join("")+
+      `<div class="note">A big slice in one place means that holding drives your account. Apple is ${(parts.find(p=>p.sym==="AAPL")?.v/now*100||0).toFixed(0)}% of your account — when Apple sneezes, your total catches a cold.</div></div>`;
+  }
+
+  // movers
+  const movers=syms.map(sym=>({sym,d:dayChangePct(DATA.tickers[sym])})).filter(m=>m.d!=null&&Math.abs(m.d)>0.0001).sort((a,b)=>b.d-a.d);
+  if(movers.length){
+    html+=`<div class="sect">Today's movers</div><div class="card">`+
+      movers.map(m=>{const h=holdingsFor(m.sym);const t=DATA.tickers[m.sym];const imp=h&&t.prevClose!=null?h[1]*(t.price-t.prevClose):null;
+        return `<div class="mover"><span><b>${m.sym}</b></span><span class="${cls(m.d)}">${arrow(m.d)}${fmtPct(m.d)}${imp!=null?` · ${imp>=0?"+":"−"}${fmt$(Math.abs(imp))} for you`:""}</span></div>`;}).join("")+`</div>`;
+  }
+
+  html+=`<div class="sect">New to this? Tap a question</div>`+
     GLOSSARY.map(([q,a])=>`<details><summary>${q}</summary><p>${a}</p></details>`).join("");
-  $("#content").innerHTML=rows;
+  $("#content").innerHTML=html;
   document.querySelectorAll("[data-go]").forEach(el=>el.onclick=()=>{active=el.dataset.go;render();window.scrollTo(0,0);});
+  document.querySelectorAll("[data-a]").forEach(b=>b.onclick=()=>{acctSpan=parseInt(b.dataset.a);renderOverview();});
 }
 
-function chartSVG(t,span){
-  const c=t.closes,d=t.dates; if(!c||c.length<2)return"";
-  let startIdx = span==="ytd" ? Math.max(0,d.findIndex(x=>x.startsWith(d[d.length-1].slice(0,4)))) : Math.max(0,c.length-1-span);
-  const seg=c.slice(startIdx);
-  const min=Math.min(...seg),max=Math.max(...seg),range=max-min||1;
-  const W=600,H=180,P=6;
-  const pts=seg.map((v,i)=>`${(i/(seg.length-1)*(W-2*P)+P).toFixed(1)},${(H-P-(v-min)/range*(H-2*P)).toFixed(1)}`).join(" ");
-  const upSeg=seg[seg.length-1]>=seg[0];
-  const col=upSeg?"var(--up)":"var(--down)";
-  return `<svg class="chart" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">
-    <polyline points="${pts}" fill="none" stroke="${col}" stroke-width="2.5" stroke-linejoin="round"/>
-  </svg>
-  <div style="display:flex;justify-content:space-between;color:var(--faint);font-size:.7rem">
-    <span>${d[startIdx]}</span><span>low ${fmt$(min)} · high ${fmt$(max)}</span><span>${d[d.length-1]}</span>
-  </div>`;
+function tickerSeries(t,span){
+  const i0=startIdx(t,span);
+  return t.dates.slice(i0).map((d,i)=>({d,v:t.closes[i0+i]}));
 }
+function normalized(series){ const b=series[0].v; return series.map(p=>({d:p.d,v:p.v/b*100})); }
 
 function renderStock(sym){
   const t=DATA.tickers[sym], h=holdingsFor(sym), d=dayChangePct(t);
   const bm=DATA.tickers[DATA.benchmark];
   const isFund=sym==="SWPPX";
   const span=chartPeriod[sym]??252;
+  const cmp=cmpMarket[sym]??false;
+
   const chips=PERIODS.map(([label,s])=>{
     const v=periodChange(t,s), b=bm?periodChange(bm,s):null;
     let m="";
     if(v!=null&&b!=null){const diff=v-b; m=Math.abs(diff)<0.5?"≈ market":(diff>0?"beat market":"under market");}
     return `<div class="chip"><div class="p">${label}</div><div class="v ${cls(v)}">${fmtPct(v)}</div><div class="m">${m}</div></div>`;
   }).join("");
+
+  let bigLine, smallLine;
+  if(viewMode==="value"&&h&&t.price!=null){
+    bigLine=`${fmt$(h[1]*t.price)} <span style="font-size:.8rem;color:var(--faint);font-weight:400">your position</span>`;
+    smallLine=`${fmtCents(t.price)} per share · you own ${h[1].toLocaleString()} shares`;
+  } else {
+    bigLine=`${t.price!=null?fmtCents(t.price):"—"} <span style="font-size:.8rem;color:var(--faint);font-weight:400">per share</span>`;
+    smallLine=h?`Your ${h[1].toLocaleString()} shares are worth ${fmt$(h[1]*t.price)}`:"";
+  }
+  const dayLine=(isFund&&(d==null||Math.abs(d)<0.0001))
+    ?`<div class="flat" style="font-size:.9rem;margin-top:4px">Price updates once daily, after market close</div>`
+    :`<div class="${cls(d)}" style="font-size:1rem;margin-top:4px;font-weight:600">${h&&t.prevClose!=null?fmtChg(h[1]*(t.price-t.prevClose),d):arrow(d)+fmtPct(d)} today</div>`;
+
+  const bump=bumpiness(t);
+  let range52="";
+  if(t.closes&&t.closes.length>20&&t.price!=null){
+    const yr=t.closes.slice(-253);
+    const lo=Math.min(...yr),hi=Math.max(...yr);
+    const pos52=(t.price-lo)/((hi-lo)||1)*100;
+    const where=pos52>85?"near its 1-year high":pos52<15?"near its 1-year low":pos52>=50?"in the upper part of its 1-year range":"in the lower part of its 1-year range";
+    range52=`<div class="badge">Past year: ${fmtCents(lo)} – ${fmtCents(hi)} · currently ${where}</div>`;
+  }
   const pos=h?`<div class="sect">Your position</div><div class="pos-grid">
     <div class="cell"><div class="k">You own</div><div class="v">${h[1].toLocaleString()} shares</div></div>
     <div class="cell"><div class="k">Worth now</div><div class="v">${t.price!=null?fmt$(h[1]*t.price):"—"}</div></div>
     <div class="cell"><div class="k">You put in</div><div class="v">${fmt$(h[2])}</div></div>
     <div class="cell"><div class="k">Your profit</div><div class="v ${t.price!=null?cls(h[1]*t.price-h[2]):""}">${t.price!=null?fmt$(h[1]*t.price-h[2]):"—"}</div></div>
   </div>`:"";
+
+  // plain-English monthly summary
+  const m1=periodChange(t,21), mB=bm?periodChange(bm,21):null;
+  let plain="";
+  if(m1!=null){
+    plain=`Over the past month, ${sym} is ${m1>=0?"up":"down"} ${Math.abs(m1).toFixed(1)}%. `;
+    if(mB!=null){const diff=m1-mB;
+      plain+=Math.abs(diff)<0.5?`That's about the same as the overall market.`:(diff>0?`The overall market moved ${fmtPct(mB)}, so ${sym} did better than the market.`:`The overall market moved ${fmtPct(mB)}, so ${sym} lagged behind the market a bit.`);}
+  }
+
+  const series=tickerSeries(t,span);
+  const chart=cmp&&bm
+    ? lineSVG(normalized(series),"var(--accent)",normalized(tickerSeries(bm,span)))
+    : lineSVG(series);
+  const legend=cmp?`<div class="legend"><span><span class="dot" style="background:var(--accent)"></span>${sym}</span><span><span class="dot" style="background:#5c6a80"></span>S&P 500 (market)</span><span style="color:var(--faint)">both start at the same point — whichever line ends higher grew more</span></div>`:"";
+
   const news=(t.news&&t.news.length)?`<div class="sect">Recent news</div><div class="card news">`+
     t.news.map(n=>`<div class="item"><a href="${n.link}" target="_blank" rel="noopener">${n.title}</a><div class="dt">${n.date||""}</div></div>`).join("")+`</div>`:"";
-  const dayLine=(isFund&&(d==null||Math.abs(d)<0.0001))
-    ?`<div class="flat" style="font-size:.9rem">Price updates once daily, after market close</div>`
-    :`<div class="${cls(d)}" style="font-size:1rem">${arrow(d)}${fmtPct(d)} today</div>`;
+
   $("#content").innerHTML=`
     <div class="card">
       <div style="font-weight:700">${t.name||sym}</div>
       <div class="desc" style="margin-top:6px">${DESC[sym]||""}</div>
-      <div class="price-big">${t.price!=null?fmt$(t.price):"—"} <span style="font-size:.8rem;color:var(--faint);font-weight:400">per share</span></div>
+      <div class="price-big">${bigLine}</div>
+      <div class="price-small">${smallLine}</div>
       ${dayLine}
+      ${bump?`<div class="badge">Bumpiness: <b style="color:var(--text)">${bump[0]}</b> — ${bump[1]}</div>`:""}
+      ${range52}
     </div>
     ${pos}
     <div class="sect">Performance</div>
     <div class="chips">${chips}</div>
-    <div class="plain">${plainSummary(sym,t)}</div>
+    <div class="plain">${plain}</div>
     <div class="card">
-      <div class="periods">${PERIODS.map(([l,s])=>`<button class="pbtn ${String(span)===String(s)?"active":""}" data-p="${s}">${l}</button>`).join("")}</div>
-      ${chartSVG(t,span)}
+      <div class="periods">${PERIODS.map(([l,s])=>`<button class="pbtn ${String(span)===String(s)?"active":""}" data-p="${s}">${l}</button>`).join("")}
+        <button class="pbtn ${cmp?"active":""}" data-cmp="1" style="margin-left:auto">vs market</button></div>
+      ${chart}${legend}
     </div>
     ${news}
     <div class="note">Performance is price change only; your actual return is a little higher because dividends buy extra shares along the way.</div>`;
-  document.querySelectorAll(".pbtn").forEach(b=>b.onclick=()=>{chartPeriod[sym]=b.dataset.p==="ytd"?"ytd":parseInt(b.dataset.p);renderStock(sym);});
+  document.querySelectorAll(".pbtn[data-p]").forEach(b=>b.onclick=()=>{chartPeriod[sym]=b.dataset.p==="ytd"?"ytd":parseInt(b.dataset.p);renderStock(sym);});
+  const cb=document.querySelector(".pbtn[data-cmp]"); if(cb)cb.onclick=()=>{cmpMarket[sym]=!cmp;renderStock(sym);};
 }
 
 function render(){
   renderTabs();
   if(active==="overview") renderOverview(); else renderStock(active);
 }
+function renderAll(){ renderVToggle(); renderTotals(); render(); }
 
 async function boot(){
   HOLD=loadHoldings();
@@ -276,12 +432,10 @@ async function boot(){
     DATA=await r.json();
   }catch(e){
     if(window.PREVIEW_DATA) DATA=window.PREVIEW_DATA;
-    else{$("#content").innerHTML=`<div class="card">Couldn't load market data. Check your connection and pull to refresh.</div>`;return;}
+    else{$("#content").innerHTML=`<div class="card">Couldn't load market data. Check your connection and try again.</div>`;return;}
   }
-  if(!DATA && window.PREVIEW_DATA) DATA=window.PREVIEW_DATA;
   $("#updated").textContent="Updated "+DATA.updated;
-  if(DATA.preview) $("#previewBanner").classList.remove("hidden");
-  renderTotals(); render();
+  renderAll();
 }
 boot();
 </script>
