@@ -1,0 +1,35 @@
+name: Update market data & check alerts
+
+on:
+  schedule:
+    # Every 15 min during US market hours (with margin for DST), weekdays.
+    - cron: "*/15 13-21 * * 1-5"
+    # Once after market close for mutual fund (SWPPX) daily price.
+    - cron: "30 22 * * 1-5"
+  workflow_dispatch: {}   # allows running it manually with a button
+
+permissions:
+  contents: write
+
+concurrency:
+  group: update
+  cancel-in-progress: true
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Fetch data and check alerts
+        env:
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+        run: python3 scripts/update.py
+
+      - name: Commit updated data
+        run: |
+          git config user.name "dashboard-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add data.json alert_state.json
+          git diff --cached --quiet || git commit -m "data update"
+          git push
