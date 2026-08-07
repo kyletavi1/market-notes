@@ -75,7 +75,8 @@ def fetch_history(symbol):
             "symbol": symbol,
             "name": NAMES.get(symbol, meta.get("longName", symbol)),
             "price": meta.get("regularMarketPrice"),
-            "prevClose": meta.get("chartPreviousClose") or meta.get("previousClose"),
+            "prevClose": meta.get("regularMarketPreviousClose")
+                         or (pairs[-2][1] if len(pairs) >= 2 else None),
             "currency": meta.get("currency", "USD"),
             "marketState": meta.get("marketState", ""),
             "dates": [datetime.fromtimestamp(t, tz=timezone.utc).strftime("%Y-%m-%d")
