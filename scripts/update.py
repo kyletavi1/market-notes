@@ -75,6 +75,8 @@ def fetch_history(symbol):
             "symbol": symbol,
             "name": NAMES.get(symbol, meta.get("longName", symbol)),
             "price": meta.get("regularMarketPrice"),
+            # NOTE: chartPreviousClose is relative to the 5y range start — wrong for
+            # daily change. Use the true previous close instead.
             "prevClose": meta.get("regularMarketPreviousClose")
                          or (pairs[-2][1] if len(pairs) >= 2 else None),
             "currency": meta.get("currency", "USD"),
@@ -89,7 +91,7 @@ def fetch_history(symbol):
 
 
 def fetch_news(symbol, limit=6):
-    """Recent headlines from Yahoo Finance RSS."""
+    """Recent headlines + snippets from Yahoo Finance RSS."""
     url = f"https://feeds.finance.yahoo.com/rss/2.0/headline?s={symbol}&region=US&lang=en-US"
     xml = get_text(url)
     if not xml:
@@ -101,13 +103,31 @@ def fetch_news(symbol, limit=6):
             title = (item.findtext("title") or "").strip()
             link = (item.findtext("link") or "").strip()
             pub = (item.findtext("pubDate") or "").strip()
+            desc = (item.findtext("description") or "").strip()
             if title and link:
-                items.append({"title": title, "link": link, "date": pub})
+                items.append({"title": title, "link": link, "date": pub, "desc": desc})
             if len(items) >= limit:
                 break
     except ET.ParseError:
         pass
     return items
+
+
+def build_overview(items):
+    """Distill RSS snippets into a short plain-text overview paragraph."""
+    import html as htmllib
+    sents = []
+    for it in items[:5]:
+        txt = re.sub(r"<[^>]+>", "", it.get("desc") or "")
+        txt = htmllib.unescape(txt).strip()
+        if not txt:
+            continue
+        first = re.split(r"(?<=[.!?])\s", txt)[0].strip()
+        if 30 < len(first) < 300 and first not in sents:
+            sents.append(first)
+        if len(sents) >= 3:
+            break
+    return " ".join(sents)
 
 
 # ---------------- alerts ----------------
@@ -208,6 +228,7 @@ def main():
         "tickers": {},
     }
     for sym, q in quotes.items():
+        items = news.get(sym, [])
         out["tickers"][sym] = {
             "name": q["name"],
             "price": q["price"],
@@ -215,7 +236,9 @@ def main():
             "marketState": q["marketState"],
             "dates": q["dates"],
             "closes": q["closes"],
-            "news": news.get(sym, []),
+            "overview": build_overview(items),
+            "news": [{"title": n["title"], "link": n["link"], "date": n["date"]}
+                     for n in items],
         }
 
     (ROOT / "data.json").write_text(json.dumps(out, separators=(",", ":")))
