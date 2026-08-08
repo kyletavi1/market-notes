@@ -64,7 +64,7 @@ h1{font-size:1.35rem;font-weight:700}
 .pbtn{background:var(--card2);border:1px solid var(--line);color:var(--dim);border-radius:8px;padding:5px 10px;font-size:.75rem;font-weight:600;cursor:pointer}
 .pbtn.active{color:var(--text);border-color:var(--accent)}
 .chwrap{position:relative}
-svg.chart{width:100%;height:180px;display:block;touch-action:pan-y}
+svg.chart{width:100%;height:180px;display:block;touch-action:none}
 .tip{position:absolute;background:#0b0e13;border:1px solid var(--accent);border-radius:8px;padding:4px 8px;font-size:.72rem;pointer-events:none;display:none;white-space:nowrap;z-index:6;transform:translate(-50%,-130%)}
 .tip b{color:var(--accent)}
 .chfoot{display:flex;justify-content:space-between;color:var(--faint);font-size:.7rem;margin-top:4px}
@@ -86,6 +86,8 @@ svg.chart{width:100%;height:180px;display:block;touch-action:pan-y}
 .setup input{width:100%;background:var(--card2);border:1px solid var(--line);border-radius:8px;color:var(--text);padding:10px;margin-top:8px;font-size:.85rem}
 .setup button{background:var(--accent);color:#08222e;border:none;border-radius:8px;padding:10px 14px;font-weight:700;margin-top:8px;cursor:pointer}
 .hidden{display:none}
+.card.urgent{border-color:var(--down)}
+.ubadge{color:var(--down);font-size:.72rem;font-weight:700;margin-bottom:6px}
 </style>
 </head>
 <body>
@@ -262,7 +264,7 @@ function attachScrub(){
     w.addEventListener("pointermove",e=>{if(e.pressure>0||e.pointerType==="mouse")show(e.clientX);});
     w.addEventListener("pointerup",hide);
     w.addEventListener("pointerleave",hide);
-    w.addEventListener("touchmove",e=>{show(e.touches[0].clientX);},{passive:true});
+    w.addEventListener("touchmove",e=>{e.preventDefault();show(e.touches[0].clientX);},{passive:false});
     w.addEventListener("touchend",hide);
   });
 }
@@ -355,12 +357,23 @@ function renderOverview(){
 
 function renderNews(){
   const syms=Object.keys(DATA.tickers).filter(s=>s!==DATA.benchmark);
-  let html="";
-  syms.forEach(sym=>{
+  const rows=syms.map(sym=>{
     const t=DATA.tickers[sym], d=dayChangePct(t);
-    const ov=t.overview&&t.overview.length>20?t.overview:"No major news coverage right now — quiet is normal, and usually good.";
+    const closes=t.closes||[];
+    let dd=null;
+    if(closes.length>=7&&t.price!=null){const hi=Math.max(...closes.slice(-7)); dd=(t.price-hi)/(hi||1)*100;}
+    const text=(t.overview||"")+" "+((t.news||[]).map(n=>n.title).join(" "));
+    const kw=/\b(plunge|crash|lawsuit|investigat\w*|bankrupt\w*|fraud|recall|halt|probe|downgrade|sell-?off|tumbl\w*|sink\w*|soar\w*|surge\w*|warn\w*|slash\w*)\b/i.test(text);
+    const urgent=(d!=null&&Math.abs(d)>=3)||(dd!=null&&dd<=-8)||kw;
+    return {sym,t,d,urgent};
+  });
+  rows.sort((a,b)=>((b.urgent?1:0)-(a.urgent?1:0))||(Math.abs(b.d??0)-Math.abs(a.d??0)));
+  let html="";
+  rows.forEach(({sym,t,d,urgent})=>{
+    const ov=t.overview&&t.overview.length>20?t.overview:"No major news coverage right now. Quiet is normal, and usually good.";
     const links=(t.news||[]).slice(0,3).map(n=>`<div class="item"><a href="${n.link}" target="_blank" rel="noopener">${n.title}</a></div>`).join("");
-    html+=`<div class="card">
+    html+=`<div class="card${urgent?" urgent":""}">
+      ${urgent?`<div class="ubadge">&#9888; Worth keeping an eye on</div>`:""}
       <div style="display:flex;justify-content:space-between;align-items:baseline">
         <span style="font-weight:700">${sym} <span style="color:var(--faint);font-weight:400;font-size:.78rem">${t.name||""}</span></span>
         <span class="${cls(d)}" style="font-size:.85rem">${arrow(d)}${fmtPct(d)}</span>
@@ -369,7 +382,7 @@ function renderNews(){
       ${links?`<div class="news" style="margin-top:8px;border-top:1px solid var(--line)">${links}</div>`:""}
     </div>`;
   });
-  html+=`<div class="note">Overviews are distilled automatically from recent financial press coverage and refresh with the market data.</div>`;
+  html+=`<div class="note">Overviews are distilled automatically from recent financial press coverage. Red-marked stocks have unusual moves or notable coverage worth watching.</div>`;
   $("#content").innerHTML=html;
 }
 
